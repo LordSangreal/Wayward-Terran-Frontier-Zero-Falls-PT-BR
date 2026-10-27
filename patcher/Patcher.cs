@@ -161,6 +161,9 @@ public class Patcher {
             }
 
             // Protecao CRITICA para audio cues do XACT / MonoGame SoundBank
+            if (type.Name == "LoaderProc" && m.Name == "loadSound") {
+                continue;
+            }
             if (type.Name == "ShipNavigationRev3" && (m.Name == "startSounds" || m.Name == "spawnFire")) {
                 continue;
             }
@@ -168,6 +171,21 @@ public class Patcher {
                 continue;
             }
             if (type.Name == "HackingScreen" && m.Name == "Update") {
+                continue;
+            }
+
+            // Protecao CRITICA para categorias de modulos no projetista de naves
+            if ((type.Name == "ShipDesignRev4" || type.Name == "ShipDesignRev3") && (m.Name == "InitCategories" || m.Name == "Init")) {
+                continue;
+            }
+
+            // Protecao CRITICA para serializacao binaria de agentes / NPCs
+            if (m.Name == "writeData") {
+                continue;
+            }
+
+            // Protecao CRITICA para inicializacao de quests (nomes e IDs internos)
+            if (type.BaseType != null && type.BaseType.Name == "TriggerEvent" && m.Name == ".ctor") {
                 continue;
             }
 
@@ -247,7 +265,20 @@ public class Patcher {
         // Marcadores de mapa (POI), waypoints e identificadores internos de quests
         if (lower == "introduction" || lower.StartsWith("waypoint_") || lower == "badguyspawn" || 
             lower == "pest" || lower == "hacking" || lower == "ship navigation" ||
-            lower == "station_t1_repair" || lower == "ssc_drone_hive" || lower == "repair tutorial")
+            lower == "station_t1_repair" || lower == "ssc_drone_hive" || lower == "repair tutorial" ||
+            lower == "farming" || lower == "feed the rats" || lower == "null quest" || lower == "null quest name" ||
+            lower == "3 ssc bosses")
+            return true;
+
+        // Cues de audio e nomes de agentes tecnicos
+        if (lower == "missile" || lower == "budd" || lower == "mick" || lower == "shady dealer" ||
+            lower == "robo barkeep 880" || lower == "robo barkeep 890")
+            return true;
+
+        // Extensoes de arquivo e caminhos de diretorio
+        if (s.StartsWith(".") && s.Length <= 5 && !s.Contains(" "))
+            return true;
+        if ((s.StartsWith("\\") || s.StartsWith("/")) && (s.EndsWith("\\") || s.EndsWith("/")))
             return true;
 
         // SQLite connection strings & databases
