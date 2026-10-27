@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Tutorial>
+	<Name>Cultivo</Name>
+	<Page>
+		<img src="page1.png" />
+		<body>
+			<text>Encontrou um esporo de cristal?
+			O cultivo e um minijogo opcional que permite produzir seus proprios recursos passivamente.</text> 
+		</body>
+	</Page>
+
+	<Page>
+		<img src="page2.png" />
+		<body>
+			<text>Usar um esporo de cristal em blocos de terra plantara um cristal com o genoma configurado no momento.
+			Sua base principal possui uma area com terra, e colher cristais aqui adicionara os recursos diretamente ao estoque da sua estacao para uso na construcao de naves.</text> 
+		</body>
+	</Page>
+
+	<Page>
+		<img src="page3.png" />
+		<body>
+			<text>Seus cristais crescem devagar, entao saia em uma aventura e confira-os quando voltar (ou mais provavelmente quando morrer).
+			Voce precisara de um laser de mineracao para colhe-los ou inspecionar seu estado.
+			Voce pode comprar um na loja local de itens.</text> 
+		</body>
+	</Page>
+	
+</Tutorial>

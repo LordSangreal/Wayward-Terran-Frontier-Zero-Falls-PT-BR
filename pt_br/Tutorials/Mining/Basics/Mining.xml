@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Tutorial>
+	<Name>Mineracao</Name>
+	<Page>
+		<img src="page1.png" />
+		<body>
+			<text>Localize uma <font color="c4faff">Jazida de Mineracao</font>. Elas estao distribuidas por varios setores, comumente encontradas perto de cinturoes de asteroides.
+O tipo de setor afeta os tipos de jazidas possiveis que podem surgir.
+Se o icone estiver vermelho, significa que ha operacoes de mineracao em andamento. Certifique-se de que sua nave esta preparada para combate, mineradores nao toleram concorrencia.</text> 
+		</body>
+	</Page>
+
+	<Page>
+		<img src="page2.png" />
+		<body>
+			<text>Aproxime-se de um dos <font color="c4faff">Nodulos de Mineracao</font> ao redor da jazida. Voce pode escanear o nodulo usando <keybind type="44" />.
+Use suas armas para destruir os pixels destacados e extrair o minerio. Ative o <font color="c4faff">Modo Coletor</font> usando <keybind type="19" /> e aproxime-se do minerio extraido para recolhe-lo.
+<font color="700707"><font color="a92d2d">O Modo Coletor</font> limita a velocidade maxima da sua nave.</font>
+A chance de extracao bem-sucedida de minerio requer que <font color="c4faff">Rendimento Base + Rendimento de Torre + Bonus</font> seja maior que 0.
+Se voce nao conseguir recolher o minerio extraido, significa que seus compartimentos de carga estao cheios.</text> 
+		</body>
+	</Page>
+	
+</Tutorial>

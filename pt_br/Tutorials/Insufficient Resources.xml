@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Tutorial>
+	<Name>Recursos insuficientes</Name>
+	<Page>
+		<img src="page1.png" />
+		<body>
+			<text>Esqueceu de coletar os recursos basicos necessarios para construir sua proxima nave?
+			Boas noticias: voce nao ficara preso na sua estacao para sempre.
+			Afinal, esta e uma estacao de mineracao.</text> 
+		</body>
+	</Page>
+
+	<Page>
+		<img src="page2.png" />
+		<body>
+			<text>Pegue o bonde ate a area de mineracao da sua base principal e voce encontrara alguns cristais crescendo que podem ser minerados para obter recursos basicos.
+			(Voce precisara de um laser de mineracao, que pode comprar na loja local de itens)
+			Minerar dentro da base principal depositara os recursos diretamente nos estoques da sua estacao.</text> 
+		</body>
+	</Page>
+
+	<Page>
+		<img src="page3.png" />
+		<body>
+			<text>Cristais totalmente desenvolvidos fornecerao significativamente mais recursos do que os menores.
+			Consulte os tutoriais sobre cultivo para aprender como os cristais funcionam e como cultivar os seus proprios.</text> 
+		</body>
+	</Page>
+	
+</Tutorial>

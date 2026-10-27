@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Tutorial>
+	<Name>Genomas de cristal</Name>
+	<Page>
+		<img src="page1.png" />
+		<body>
+			<text>Os cristais crescem seguindo regras simples determinadas por seu genoma.
+			Para acessar o genoma do seu cristal, clique no espaco de genoma na ficha do seu personagem aqui.</text>
+		</body>
+	</Page>
+
+	<Page>
+		<img src="page2.png" />
+		<body>
+			<text>Toda vez que plantar um cristal a partir de um esporo, ele usara a configuracao atual do seu genoma.
+			Aviso: e possivel criar um genoma que nao cresca de forma alguma!
+			Experimente combinacoes diferentes para ver o que funciona melhor.</text>
+		</body>
+	</Page>
+
+	<Page>
+		<img src="page3.png" />
+		<body>
+			<text>Voce pode configurar seu genoma com os genes que coleta durante suas aventuras.
+			Dica: minerar minerios as vezes rende um gene que faz seus cristais produzirem aquele tipo de recurso.</text>
+		</body>
+	</Page>
+	
+</Tutorial>

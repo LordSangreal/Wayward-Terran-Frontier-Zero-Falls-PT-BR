@@ -1,0 +1,39 @@
+# Backups e binários grandes do jogo Steam
+backup_game_original/
+original/
+WTF_test.exe
+WTF_patched_temp.exe
+*.zip
+cecil/
+Mono.Cecil*.dll
+
+# Batches intermediários temporários
+batch_*.json
+strings_to_translate.json
+
+# Python caches e temporários
+__pycache__/
+*.pyc
+*.pyo
+
+# Arquivos de log e testes locais de compilação
+scripts/CheckAsm.exe
+scripts/CheckAsm.cs
+scripts/DiffGame1.exe
+scripts/DiffGame1.cs
+scripts/Dump*.exe
+scripts/Dump*.cs
+scripts/Find*.exe
+scripts/Find*.cs
+scripts/Inspect.exe
+scripts/Inspect.cs
+scripts/ScanAllStrings.exe
+scripts/ScanAllStrings.cs
+scripts/VerifyPatched.exe
+scripts/VerifyPatched.cs
+scripts/*.txt
+scripts/missing_*.json
+scripts/tutorial_*.json
+scripts/filtered_to_translate.json
+scripts/remaining_to_translate.json
+scripts/all_game_strings.json

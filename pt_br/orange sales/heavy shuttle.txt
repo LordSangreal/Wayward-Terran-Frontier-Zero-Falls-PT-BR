@@ -1,0 +1,2 @@
+ELF Heavy Shuttle
+Para nao ficar atras da Monolith, os engenheiros da Frente de Liberacao de Energia criaram a variante Heavy Shuttle sobre o popular chassi da Runner. Seu layout e extremamente eficiente e oferece uma melhoria clara em relacao ao Shuttle convencional: o dobro de capacidade de carga, um beliche adicional e um conjunto extra de sensores para travar miras com mais facilidade em naves menores.
