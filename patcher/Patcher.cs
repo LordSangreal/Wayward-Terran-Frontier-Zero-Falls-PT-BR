@@ -155,6 +155,17 @@ public class Patcher {
                 continue;
             }
 
+            // Protecao CRITICA para audio cues do XACT / MonoGame SoundBank
+            if (type.Name == "ShipNavigationRev3" && (m.Name == "startSounds" || m.Name == "spawnFire")) {
+                continue;
+            }
+            if (type.Name == "Ship" && m.Name == "playTravelCharge") {
+                continue;
+            }
+            if (type.Name == "HackingScreen" && m.Name == "Update") {
+                continue;
+            }
+
             // Tratamento especifico e seguro para o WidgetShipStatus (HUD de barras da nave)
             if (type.Name == "WidgetShipStatus" && m.Name == "CreateElemenets") {
                 foreach (var i in m.Body.Instructions) {
@@ -224,6 +235,9 @@ public class Patcher {
 
         // Pasta Content do MonoGame e WMI
         if (lower == "content" || lower == @"root\cimv2") return true;
+
+        // Cues de audio do XACT / MonoGame SoundBank
+        if (lower == "fire" || lower == "warpspool" || lower == "klaxon_loop" || lower == "amb_reactor-loop") return true;
 
         // SQLite connection strings & databases
         if (lower.Contains("data source=") || lower.Contains("version=3;") || lower.EndsWith(".sqlite") || lower.EndsWith(".db"))
