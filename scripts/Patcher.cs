@@ -13,19 +13,11 @@ public class Patcher {
         Console.WriteLine();
 
         string appDir = AppDomain.CurrentDomain.BaseDirectory;
-        string dictFile = Path.Combine(appDir, "translations_exe.json");
-        string blacklistFile = Path.Combine(appDir, "shader_blacklist.json");
+        string dictFile = FindFile(appDir, "translations_exe.json");
+        string blacklistFile = FindFile(appDir, "shader_blacklist.json");
 
-        if (!File.Exists(dictFile)) {
-            // Tenta procurar na pasta do patcher ou pai
-            dictFile = Path.Combine(appDir, @"patcher\translations_exe.json");
-            blacklistFile = Path.Combine(appDir, @"patcher\shader_blacklist.json");
-        }
-
-        if (!File.Exists(dictFile)) {
-            Console.WriteLine("[ERRO] Arquivo de traducoes nao encontrado: " + dictFile);
-            Console.WriteLine("Pressione qualquer tecla para sair...");
-            Console.ReadKey();
+        if (string.IsNullOrEmpty(dictFile) || !File.Exists(dictFile)) {
+            Console.WriteLine("[ERRO] Arquivo translations_exe.json nao encontrado!");
             return 1;
         }
 
@@ -33,7 +25,6 @@ public class Patcher {
         if (args.Length > 0 && Directory.Exists(args[0])) {
             gameDir = args[0];
         } else {
-            // Tenta detectar automaticamente
             string[] possiblePaths = new string[] {
                 Directory.GetCurrentDirectory(),
                 appDir,
@@ -55,14 +46,13 @@ public class Patcher {
         if (string.IsNullOrEmpty(gameDir) || !File.Exists(Path.Combine(gameDir, "WTF.exe"))) {
             Console.WriteLine("Nao foi possivel detectar a pasta do jogo automaticamente.");
             Console.Write("Por favor, digite o caminho da pasta onde o jogo esta instalado: ");
-            gameDir = Console.ReadLine().Trim('\"', ' ');
+            gameDir = Console.ReadLine();
+            if (!string.IsNullOrEmpty(gameDir)) gameDir = gameDir.Trim('\"', ' ');
         }
 
         string gameExe = Path.Combine(gameDir, "WTF.exe");
         if (!File.Exists(gameExe)) {
             Console.WriteLine("[ERRO] WTF.exe nao foi encontrado em: " + gameDir);
-            Console.WriteLine("Pressione qualquer tecla para sair...");
-            Console.ReadKey();
             return 1;
         }
 
@@ -76,7 +66,7 @@ public class Patcher {
             Console.WriteLine("Backup original ja existe em: " + backupExe);
         }
 
-        Console.WriteLine("Carregando dicionario de traducoes...");
+        Console.WriteLine("Carregando dicionario de traducoes: " + dictFile);
         var dict = LoadDictionary(dictFile);
         Console.WriteLine("Termos seguros carregados: " + dict.Count);
 
@@ -105,6 +95,22 @@ public class Patcher {
         return 0;
     }
 
+    static string FindFile(string startDir, string fileName) {
+        string[] candidates = new string[] {
+            Path.Combine(startDir, fileName),
+            Path.Combine(startDir, "patcher", fileName),
+            Path.Combine(startDir, "..", fileName),
+            Path.Combine(startDir, "..", "patcher", fileName),
+            Path.Combine(startDir, "..", "scripts", fileName),
+            Path.Combine(@"d:\Tradução WTF Zero falls", fileName),
+            Path.Combine(@"d:\Tradução WTF Zero falls", "patcher", fileName)
+        };
+        foreach (var c in candidates) {
+            if (File.Exists(c)) return Path.GetFullPath(c);
+        }
+        return null;
+    }
+
     static int ProcessType(TypeDefinition type, Dictionary<string, string> dict, HashSet<string> blacklist) {
         int count = 0;
         foreach (var m in type.Methods) {
@@ -117,6 +123,11 @@ public class Patcher {
 
             // Protecao CRITICA para inicializacao de Content / Assets do MonoGame
             if (type.Name == "Game1" && (m.Name == ".ctor" || m.Name == "Initialize")) {
+                continue;
+            }
+
+            // Protecao CRITICA para XML parsing e templates de tutorial
+            if (type.Name == "TutorialTemplate" || type.Name == "TUTORIAL_BAG") {
                 continue;
             }
 
@@ -167,6 +178,11 @@ public class Patcher {
     static bool IsSqlOrTechnical(string s) {
         if (string.IsNullOrEmpty(s)) return true;
         string lower = s.ToLowerInvariant().Trim();
+
+        // Tags XML reservadas da engine
+        if (lower == "name" || lower == "page" || lower == "img" || lower == "src" || lower == "body" || 
+            lower == "type" || lower == "color" || lower == "font" || lower == "text" || lower == "bind")
+            return true;
 
         // Pasta Content do MonoGame
         if (lower == "content") return true;
