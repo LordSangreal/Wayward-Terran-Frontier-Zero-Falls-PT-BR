@@ -77,6 +77,18 @@ public class Patcher {
         var readerParams = new ReaderParameters { ReadWrite = false };
         var asm = AssemblyDefinition.ReadAssembly(backupExe, readerParams);
 
+        // Traducao dos nomes de Raridade de Biomas/Recursos no Enum Rarity
+        foreach (var type in asm.MainModule.Types) {
+            if (type.FullName == "CoOpSpRpG.Rarity") {
+                foreach (var f in type.Fields) {
+                    if (f.Name == "Common") f.Name = "Comum";
+                    else if (f.Name == "Uncommon") f.Name = "Incomum";
+                    else if (f.Name == "Rare") f.Name = "Raro";
+                    else if (f.Name == "Exotic") f.Name = "Exotico";
+                }
+            }
+        }
+
         int replaced = 0;
         foreach (var type in asm.MainModule.Types) {
             replaced += ProcessType(type, dict, blacklist);
