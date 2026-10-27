@@ -17,21 +17,9 @@ __pycache__/
 *.pyo
 
 # Arquivos de log e testes locais de compilação
-scripts/CheckAsm.exe
-scripts/CheckAsm.cs
-scripts/DiffGame1.exe
-scripts/DiffGame1.cs
-scripts/Dump*.exe
-scripts/Dump*.cs
-scripts/Find*.exe
-scripts/Find*.cs
-scripts/Inspect.exe
-scripts/Inspect.cs
-scripts/ScanAllStrings.exe
-scripts/ScanAllStrings.cs
-scripts/VerifyPatched.exe
-scripts/VerifyPatched.cs
+scripts/*.exe
 scripts/*.txt
+scripts/CheckAsm.cs
 scripts/missing_*.json
 scripts/tutorial_*.json
 scripts/filtered_to_translate.json

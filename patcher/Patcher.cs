@@ -113,6 +113,35 @@ public class Patcher {
 
     static int ProcessType(TypeDefinition type, Dictionary<string, string> dict, HashSet<string> blacklist) {
         int count = 0;
+
+        // Protecao CRITICA para XML parsing e templates de tutorial
+        if (type.Name == "TutorialTemplate" || type.Name == "TUTORIAL_BAG") {
+            return 0;
+        }
+
+        // Protecao CRITICA contra modificacao de banco de dados SQLite
+        if (type.Name == "WorldDatabase") {
+            return 0;
+        }
+
+        // Protecao CRITICA para CHARACTER_DATA: traduzir apenas notificacoes ao jogador, NUNCA instrucoes SQL!
+        if (type.Name == "CHARACTER_DATA") {
+            foreach (var m in type.Methods) {
+                if (!m.HasBody) continue;
+                foreach (var i in m.Body.Instructions) {
+                    if (i.OpCode == OpCodes.Ldstr) {
+                        string val = i.Operand as string;
+                        if (val == null) continue;
+                        if (IsSafeCharacterDataString(val) && dict.ContainsKey(val)) {
+                            i.Operand = dict[val];
+                            count++;
+                        }
+                    }
+                }
+            }
+            return count;
+        }
+
         foreach (var m in type.Methods) {
             if (!m.HasBody) continue;
 
@@ -123,11 +152,6 @@ public class Patcher {
 
             // Protecao CRITICA para inicializacao de Content / Assets do MonoGame
             if (type.Name == "Game1" && (m.Name == ".ctor" || m.Name == "Initialize")) {
-                continue;
-            }
-
-            // Protecao CRITICA para XML parsing e templates de tutorial
-            if (type.Name == "TutorialTemplate" || type.Name == "TUTORIAL_BAG") {
                 continue;
             }
 
@@ -175,6 +199,20 @@ public class Patcher {
         return count;
     }
 
+    static bool IsSafeCharacterDataString(string s) {
+        return s == "Character name already exists" ||
+               s == "Character name error" ||
+               s == "Level up! You are now level " ||
+               s == "New research available. Press " ||
+               s == " to open research" ||
+               s == "New ship research available" ||
+               s == "Ship hull unlocked" ||
+               s == "Ship design added" ||
+               s == "variant " ||
+               s == "Tab " ||
+               s == "Failed to upgrade an old profile";
+    }
+
     static bool IsSqlOrTechnical(string s) {
         if (string.IsNullOrEmpty(s)) return true;
         string lower = s.ToLowerInvariant().Trim();
@@ -184,18 +222,21 @@ public class Patcher {
             lower == "type" || lower == "color" || lower == "font" || lower == "text" || lower == "bind")
             return true;
 
-        // Pasta Content do MonoGame
-        if (lower == "content") return true;
+        // Pasta Content do MonoGame e WMI
+        if (lower == "content" || lower == @"root\cimv2") return true;
 
         // SQLite connection strings & databases
         if (lower.Contains("data source=") || lower.Contains("version=3;") || lower.EndsWith(".sqlite") || lower.EndsWith(".db"))
             return true;
 
         // SQL DDL & DML
-        if (lower.StartsWith("create table") || lower.StartsWith("delete from") || lower.StartsWith("insert into") || lower.StartsWith("drop table") || lower.StartsWith("pragma "))
+        if (lower.StartsWith("create table") || lower.StartsWith("delete from") || lower.StartsWith("insert into") || lower.StartsWith("insert or") || lower.StartsWith("drop table") || lower.StartsWith("pragma ") || lower.StartsWith("alter table"))
             return true;
 
-        if (lower.StartsWith("select ") && (lower.Contains(" from ") || lower.Contains(" count(") || lower.Contains(" where ")))
+        if (lower.StartsWith("select ") && (lower.Contains(" from ") || lower.Contains(" count(") || lower.Contains(" where ") || lower.EndsWith("from ")))
+            return true;
+
+        if (lower.StartsWith("' and") || lower.StartsWith("', @") || lower.StartsWith("@") || lower.Contains("column_name=") || lower.Contains("table_name="))
             return true;
 
         if (lower.Contains("primary key") || lower.Contains("values (") || lower.Contains("values("))
