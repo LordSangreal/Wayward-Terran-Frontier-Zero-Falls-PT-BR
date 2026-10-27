@@ -124,6 +124,11 @@ public class Patcher {
             return 0;
         }
 
+        // Protecao CRITICA para estagios de quest (nao alterar spawn points nem marcadores de mapa)
+        if (type.Name == "AttackPlayerWithNonFactionStage") {
+            return 0;
+        }
+
         // Protecao CRITICA para CHARACTER_DATA: traduzir apenas notificacoes ao jogador, NUNCA instrucoes SQL!
         if (type.Name == "CHARACTER_DATA") {
             foreach (var m in type.Methods) {
@@ -238,6 +243,12 @@ public class Patcher {
 
         // Cues de audio do XACT / MonoGame SoundBank
         if (lower == "fire" || lower == "warpspool" || lower == "klaxon_loop" || lower == "amb_reactor-loop") return true;
+
+        // Marcadores de mapa (POI), waypoints e identificadores internos de quests
+        if (lower == "introduction" || lower.StartsWith("waypoint_") || lower == "badguyspawn" || 
+            lower == "pest" || lower == "hacking" || lower == "ship navigation" ||
+            lower == "station_t1_repair" || lower == "ssc_drone_hive" || lower == "repair tutorial")
+            return true;
 
         // SQLite connection strings & databases
         if (lower.Contains("data source=") || lower.Contains("version=3;") || lower.EndsWith(".sqlite") || lower.EndsWith(".db"))
