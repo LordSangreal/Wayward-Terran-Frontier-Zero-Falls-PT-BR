@@ -1,4 +1,8 @@
 @echo off
+if exist "%~dp0Instalador_Traducao_PTBR.exe" (
+    start "" "%~dp0Instalador_Traducao_PTBR.exe"
+    exit /b 0
+)
 chcp 65001 >nul
 title Instalador da Tradução PT-BR v1.0.1 - Zero Falls
 cls

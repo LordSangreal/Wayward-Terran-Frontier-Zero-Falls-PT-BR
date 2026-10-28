@@ -10,6 +10,7 @@ New-Item -ItemType Directory -Path $tempDir | Out-Null
 
 Copy-Item (Join-Path $baseDir "Instalar_Traducao.bat") $tempDir
 Copy-Item (Join-Path $baseDir "Restaurar_Original.bat") $tempDir
+Copy-Item (Join-Path $baseDir "Instalador_Traducao_PTBR.exe") $tempDir
 Copy-Item (Join-Path $baseDir "README.md") $tempDir
 Copy-Item (Join-Path $baseDir "pt_br") $tempDir -Recurse
 Copy-Item (Join-Path $baseDir "patcher") $tempDir -Recurse

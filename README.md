@@ -4,13 +4,21 @@ Tradução completa e atualizada para **Português do Brasil (PT-BR)** do jogo *
 
 ---
 
-## 🚀 Como Instalar (Instalação Fácil em 1 Clique)
+## 🚀 Como Instalar (Fácil em 1 Clique)
 
+Você pode escolher entre duas formas super fáceis:
+
+### Opção 1: Executável Autônomo com Janela Visual (Recomendado - Sem Descompactar!)
+1. Baixe o arquivo **`Instalador_Traducao_PTBR.exe`** na aba [Releases](https://github.com/LordSangreal/Wayward-Terran-Frontier-Zero-Falls-PT-BR/releases).
+2. Dê um duplo clique no executável.
+3. A janela detectará sua biblioteca Steam automaticamente em qualquer HD ou SSD (`C:`, `D:`, `E:`, `F:`, etc.).
+4. Clique em **▶ INSTALAR TRADUÇÃO PT-BR**. Pronto!
+
+### Opção 2: Pacote ZIP Tradicional
 1. Baixe o pacote **`Zero_Falls_PTBR_v1.0.1.zip`** na aba [Releases](https://github.com/LordSangreal/Wayward-Terran-Frontier-Zero-Falls-PT-BR/releases).
 2. Extraia o arquivo ZIP em qualquer pasta do seu computador.
-3. Dê um duplo clique no arquivo **`Instalar_Traducao.bat`**.
-4. O instalador detectará automaticamente a pasta do jogo na sua Steam (ou solicitará o caminho caso esteja em outra partição personalizada).
-5. Pronto! Inicie o jogo normalmente pela sua biblioteca da **Steam**.
+3. Dê um duplo clique no arquivo **`Instalador_Traducao_PTBR.exe`** ou **`Instalar_Traducao.bat`**.
+4. Inicie o jogo normalmente pela sua biblioteca da **Steam**.
 
 ---
 
@@ -68,6 +76,13 @@ Tradução completa e atualizada para **Português do Brasil (PT-BR)** do jogo *
 
 ## 🔄 Como Restaurar o Jogo Original em Inglês
 Caso deseje voltar o jogo para o inglês original a qualquer momento:
-1. Dê um duplo clique em **`Restaurar_Original.bat`**.
-2. O script restaurará o executável original a partir de `WTF_backup.exe` e o banco de parâmetros original.
+1. Abra o **`Instalador_Traducao_PTBR.exe`** e clique em **↺ Restaurar Original (Inglês)** (ou execute `Restaurar_Original.bat`).
+2. O instalador restaurará o executável original a partir de `WTF_backup.exe` e o banco de parâmetros original.
 3. Se preferir fazer via Steam: clique com o botão direito no jogo na Steam -> **Propriedades** -> **Arquivos Instalados** -> **Verificar integridade dos arquivos**.
+
+---
+
+## ⚙️ Manutenção e Futuros Updates da Steam
+Graças à nossa arquitetura em pipeline baseada em **Mono.Cecil** e análise de deltas:
+- **Sobrevivência a Atualizações:** Quando o desenvolvedor lança um novo patch na Steam, o instalador reconhece a nova compilação, arquiva o backup antigo e aplica as mais de 8.300 traduções existentes no novo executável sem quebrar offsets.
+- **Processamento de Novidades:** Caso o update traga novas mecânicas ou itens, os scripts de auditoria integrados (`scripts/analyze_new_version.cs` e `scripts/check_ser_diff.cs`) extraem estritamente as strings novas em menos de 5 minutos, permitindo publicar versões compatíveis quase instantaneamente.

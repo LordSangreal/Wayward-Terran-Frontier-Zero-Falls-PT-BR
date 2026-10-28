@@ -3,6 +3,8 @@ backup_game_original/
 original/
 WTF_test.exe
 WTF_patched_temp.exe
+Instalador_Traducao_PTBR.exe
+payload.zip
 *.zip
 cecil/
 Mono.Cecil*.dll
