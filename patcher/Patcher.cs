@@ -101,6 +101,9 @@ public class Patcher {
         var readerParams = new ReaderParameters { ReadWrite = false };
         var asm = AssemblyDefinition.ReadAssembly(backupExe, readerParams);
 
+        // Traducao dos cabecalhos da tela de arvore de talentos (TalentsScreenV)
+        PatchTalentsScreenHeaders(asm);
+
         // Traducao dos nomes de Raridade de Biomas/Recursos no Enum Rarity
         foreach (var type in asm.MainModule.Types) {
             if (type.FullName == "CoOpSpRpG.Rarity") {
@@ -213,6 +216,11 @@ public class Patcher {
             return 0;
         }
 
+        // Protecao CRITICA para classes de gerenciamento interno de eventos, agentes e arquivos de save
+        if (type.Name == "TriggerEvent" || type.Name == "AGENTBAG" || type.Name == "AgentTracker" || type.Name == "GameFile") {
+            return 0;
+        }
+
         // Protecao CRITICA para CHARACTER_DATA: traduzir apenas notificacoes ao jogador, NUNCA instrucoes SQL!
         if (type.Name == "CHARACTER_DATA") {
             foreach (var m in type.Methods) {
@@ -263,13 +271,16 @@ public class Patcher {
                 continue;
             }
 
-            // Protecao CRITICA para categorias de modulos no projetista de naves
-            if ((type.Name == "ShipDesignRev4" || type.Name == "ShipDesignRev3") && (m.Name == "InitCategories" || m.Name == "Init")) {
+            // Protecao CRITICA contra corrupcao de serializacao / desserializacao binaria de saves e rede
+            string mNameLower = m.Name.ToLowerInvariant();
+            if (mNameLower.StartsWith("read") || mNameLower.StartsWith("write") ||
+                mNameLower.StartsWith("save") || mNameLower.StartsWith("loadgame") ||
+                m.Name == "setPhase" || m.Name == "cleanUpQuests" || m.Name == "adoptAgent") {
                 continue;
             }
 
-            // Protecao CRITICA para serializacao binaria de agentes / NPCs
-            if (m.Name == "writeData") {
+            // Protecao CRITICA para categorias de modulos no projetista de naves
+            if ((type.Name == "ShipDesignRev4" || type.Name == "ShipDesignRev3") && (m.Name == "InitCategories" || m.Name == "Init")) {
                 continue;
             }
 
@@ -300,6 +311,14 @@ public class Patcher {
 
                     // Protecao CRITICA contra SQL, SQLite e connection strings
                     if (IsSqlOrTechnical(s)) continue;
+
+                    // Protecao CRITICA contra alteracao de identificadores de agentes em chamadas de lookup
+                    if (i.Next != null && i.Next.Operand != null) {
+                        string nextOp = i.Next.Operand.ToString();
+                        if (nextOp.Contains("getAgent") || nextOp.Contains("adoptAgent") || nextOp.Contains("addAgent")) {
+                            continue;
+                        }
+                    }
 
                     // Se o termo estiver na blacklist de shaders e nao for um texto longo, nao substituir!
                     if (blacklist.Contains(s) && !s.Contains(" ")) {
@@ -440,4 +459,113 @@ public class Patcher {
         }
         return set;
     }
+
+    static void PatchTalentsScreenHeaders(AssemblyDefinition asmGame) {
+        try {
+            byte[] dllBytes = Convert.FromBase64String(TalentPatchBase64);
+            var asmPatch = AssemblyDefinition.ReadAssembly(new MemoryStream(dllBytes));
+            var patchType = asmPatch.MainModule.GetType("TalentPatch");
+            MethodDefinition patchMethod = null;
+            foreach (var m in patchType.Methods) {
+                if (m.Name == "DrawCategoryHeader") {
+                    patchMethod = m;
+                    break;
+                }
+            }
+
+            var targetType = asmGame.MainModule.GetType("CoOpSpRpG.TalentsScreenV");
+            if (targetType == null || patchMethod == null) return;
+
+            var newMethod = new MethodDefinition("DrawCategoryHeader", MethodAttributes.Public | MethodAttributes.Static, asmGame.MainModule.TypeSystem.Void);
+            foreach (var p in patchMethod.Parameters) {
+                newMethod.Parameters.Add(new ParameterDefinition(p.Name, p.Attributes, asmGame.MainModule.ImportReference(p.ParameterType)));
+            }
+            foreach (var v in patchMethod.Body.Variables) {
+                newMethod.Body.Variables.Add(new VariableDefinition(asmGame.MainModule.ImportReference(v.VariableType)));
+            }
+            newMethod.Body.InitLocals = patchMethod.Body.InitLocals;
+
+            var il = newMethod.Body.GetILProcessor();
+            for (int i = 0; i < patchMethod.Body.Instructions.Count; i++) {
+                var inst = patchMethod.Body.Instructions[i];
+                object op = inst.Operand;
+                if (op is TypeReference) op = asmGame.MainModule.ImportReference((TypeReference)op);
+                else if (op is MethodReference) op = asmGame.MainModule.ImportReference((MethodReference)op);
+                else if (op is FieldReference) op = asmGame.MainModule.ImportReference((FieldReference)op);
+                
+                Instruction newInst;
+                if (op == null) newInst = il.Create(inst.OpCode);
+                else if (op is TypeReference) newInst = il.Create(inst.OpCode, (TypeReference)op);
+                else if (op is MethodReference) newInst = il.Create(inst.OpCode, (MethodReference)op);
+                else if (op is FieldReference) newInst = il.Create(inst.OpCode, (FieldReference)op);
+                else if (op is string) newInst = il.Create(inst.OpCode, (string)op);
+                else if (op is int) newInst = il.Create(inst.OpCode, (int)op);
+                else if (op is double) newInst = il.Create(inst.OpCode, (double)op);
+                else if (op is float) newInst = il.Create(inst.OpCode, (float)op);
+                else if (op is byte) newInst = il.Create(inst.OpCode, (byte)op);
+                else if (op is sbyte) newInst = il.Create(inst.OpCode, (sbyte)op);
+                else if (op is VariableDefinition) {
+                    int vIdx = ((VariableDefinition)op).Index;
+                    newInst = il.Create(inst.OpCode, newMethod.Body.Variables[vIdx]);
+                }
+                else if (op is ParameterDefinition) {
+                    int pIdx = ((ParameterDefinition)op).Index;
+                    newInst = il.Create(inst.OpCode, newMethod.Parameters[pIdx]);
+                }
+                else if (op is Instruction) {
+                    newInst = il.Create(OpCodes.Nop);
+                    newInst.OpCode = inst.OpCode;
+                }
+                else {
+                    throw new Exception("Unhandled operand: " + op);
+                }
+                il.Append(newInst);
+            }
+
+            for (int i = 0; i < patchMethod.Body.Instructions.Count; i++) {
+                var oldInst = patchMethod.Body.Instructions[i];
+                if (oldInst.Operand is Instruction) {
+                    int targetIdx = patchMethod.Body.Instructions.IndexOf((Instruction)oldInst.Operand);
+                    newMethod.Body.Instructions[i].Operand = newMethod.Body.Instructions[targetIdx];
+                }
+            }
+
+            targetType.Methods.Add(newMethod);
+
+            MethodDefinition drawMethod = null;
+            foreach (var m in targetType.Methods) {
+                if (m.Name == "Draw") {
+                    drawMethod = m;
+                    break;
+                }
+            }
+            if (drawMethod == null) return;
+
+            var drawIl = drawMethod.Body.GetILProcessor();
+            for (int i = 0; i < drawMethod.Body.Instructions.Count; i++) {
+                var inst = drawMethod.Body.Instructions[i];
+                if (inst.OpCode == OpCodes.Callvirt && inst.Operand != null && inst.Operand.ToString().Contains("SpriteBatch::Draw(Microsoft.Xna.Framework.Graphics.Texture2D,Microsoft.Xna.Framework.Vector2,Microsoft.Xna.Framework.Color)")) {
+                    var p4Inst = drawMethod.Body.Instructions[i - 4];
+                    if (p4Inst.Operand != null && p4Inst.Operand.ToString().Contains("categoryNameSpots")) {
+                        var prevIndexInst = drawMethod.Body.Instructions[i - 3];
+                        Instruction loadIndex;
+                        if (prevIndexInst.Operand is VariableDefinition) {
+                            loadIndex = drawIl.Create(prevIndexInst.OpCode, (VariableDefinition)prevIndexInst.Operand);
+                        } else {
+                            loadIndex = drawIl.Create(prevIndexInst.OpCode);
+                        }
+                        drawIl.InsertBefore(inst, loadIndex);
+                        inst.OpCode = OpCodes.Call;
+                        inst.Operand = newMethod;
+                        Console.WriteLine("Cabecalhos da arvore de talentos (TalentsScreenV) localizados com sucesso.");
+                        break;
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            Console.WriteLine("Aviso ao localizar cabecalhos de talentos: " + ex.Message);
+        }
+    }
+
+    private const string TalentPatchBase64 = "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AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==";
 }
