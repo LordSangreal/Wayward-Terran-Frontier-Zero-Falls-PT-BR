@@ -1,9 +1,9 @@
 @echo off
 chcp 65001 >nul
-title Instalador da Tradução PT-BR - Zero Falls
+title Instalador da Tradução PT-BR v1.0.1 - Zero Falls
 cls
 echo ==========================================================
-echo    Instalador da Tradução PT-BR para Wayward Terran Frontier
+echo    Instalador da Tradução PT-BR v1.0.1 - Zero Falls
 echo ==========================================================
 echo.
 
@@ -42,7 +42,10 @@ if not exist "%GAME_DIR%\WTF.exe" (
 echo.
 echo [1/3] Pasta do jogo confirmada: "%GAME_DIR%"
 echo.
-echo [2/3] Copiando arquivos externos traduzidos (Tutoriais, Diários, Lojas)...
+echo [2/3] Copiando arquivos externos traduzidos (Tutoriais, Diários, Lojas, Banco de Parâmetros)...
+if exist "%GAME_DIR%\parameterdb\world_params.sqlite" if not exist "%GAME_DIR%\parameterdb\world_params_backup.sqlite" (
+    copy /Y "%GAME_DIR%\parameterdb\world_params.sqlite" "%GAME_DIR%\parameterdb\world_params_backup.sqlite" >nul
+)
 xcopy "%SCRIPT_DIR%pt_br\*" "%GAME_DIR%\" /E /Y /I >nul
 if errorlevel 1 (
     echo [ERRO] Falha ao copiar arquivos de pt_br para a pasta do jogo.

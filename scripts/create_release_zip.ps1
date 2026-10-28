@@ -1,8 +1,6 @@
 $baseDir = Split-Path -Parent $PSScriptRoot
-$zipPath = Join-Path $baseDir "Zero_Falls_PTBR_v1.0.0.zip"
-if (Test-Path $zipPath) {
-    Remove-Item $zipPath -Force
-}
+$zipPath = Join-Path $baseDir "Zero_Falls_PTBR_v1.0.1.zip"
+Get-ChildItem -Path $baseDir -Filter "Zero_Falls_PTBR_v*.zip" | Remove-Item -Force
 
 $tempDir = Join-Path $env:TEMP "WTF_Release_Package"
 if (Test-Path $tempDir) {

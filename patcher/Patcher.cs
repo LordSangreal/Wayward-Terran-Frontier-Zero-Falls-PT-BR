@@ -8,7 +8,7 @@ using Mono.Cecil.Cil;
 public class Patcher {
     public static int Main(string[] args) {
         Console.WriteLine("==========================================================");
-        Console.WriteLine("   Tradutor PT-BR - Wayward Terran Frontier: Zero Falls   ");
+        Console.WriteLine("   Tradutor PT-BR v1.0.1 - Wayward Terran Frontier        ");
         Console.WriteLine("==========================================================");
         Console.WriteLine();
 
@@ -59,11 +59,35 @@ public class Patcher {
         Console.WriteLine("Pasta do jogo detectada: " + gameDir);
 
         string backupExe = Path.Combine(gameDir, "WTF_backup.exe");
+        var gameFileInfo = new FileInfo(gameExe);
+        bool needsNewBackup = false;
+
         if (!File.Exists(backupExe)) {
-            Console.WriteLine("Criando backup do executavel original em: " + backupExe);
-            File.Copy(gameExe, backupExe, false);
+            needsNewBackup = true;
         } else {
-            Console.WriteLine("Backup original ja existe em: " + backupExe);
+            var backupFileInfo = new FileInfo(backupExe);
+            if (gameFileInfo.Length != backupFileInfo.Length) {
+                // Tamanhos diferentes: verificar se gameExe atual e um original limpo da Steam
+                if (CheckIfOriginal(gameExe)) {
+                    Console.WriteLine("[AVISO] Nova versao do jogo detectada na Steam!");
+                    string oldBackup = Path.Combine(gameDir, "WTF_backup_anterior.exe");
+                    try {
+                        if (File.Exists(oldBackup)) File.Delete(oldBackup);
+                        File.Move(backupExe, oldBackup);
+                        Console.WriteLine("Backup da versao anterior arquivado em: " + oldBackup);
+                    } catch (Exception ex) {
+                        Console.WriteLine("Aviso ao mover backup anterior: " + ex.Message);
+                    }
+                    needsNewBackup = true;
+                }
+            }
+        }
+
+        if (needsNewBackup) {
+            Console.WriteLine("Criando backup do executavel original em: " + backupExe);
+            File.Copy(gameExe, backupExe, true);
+        } else {
+            Console.WriteLine("Backup original confirmado em: " + backupExe);
         }
 
         Console.WriteLine("Carregando dicionario de traducoes: " + dictFile);
@@ -87,6 +111,45 @@ public class Patcher {
                     else if (f.Name == "Exotic") f.Name = "Exotico";
                 }
             }
+            // Desbloquear Singleplayer/Campanha se a versao de teste veio com openMP travado
+            if (type.FullName == "CoOpSpRpG.CONFIG") {
+                foreach (var m in type.Methods) {
+                    if (m.Name == ".cctor") {
+                        for (int i = 0; i < m.Body.Instructions.Count; i++) {
+                            var instr = m.Body.Instructions[i];
+                            if (instr.OpCode == OpCodes.Stsfld && instr.Operand != null && instr.Operand.ToString().Contains("openMP")) {
+                                m.Body.Instructions[i - 1].OpCode = OpCodes.Ldc_I4_0;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Correcao de compatibilidade de save antigo (auto-migracao de tabelas SQLite como professions)
+            if (type.FullName == "CoOpSpRpG.CHARACTER_DATA") {
+                foreach (var m in type.Methods) {
+                    if (m.Name == "loadWorldCharacter") {
+                        var il = m.Body.GetILProcessor();
+                        MethodDefinition createAll = null;
+                        foreach (var method in type.Methods) {
+                            if (method.Name == "createAllTables") {
+                                createAll = method;
+                                break;
+                            }
+                        }
+                        for (int i = 0; i < m.Body.Instructions.Count; i++) {
+                            var instr = m.Body.Instructions[i];
+                            if (instr.OpCode == OpCodes.Callvirt && instr.Operand != null && instr.Operand.ToString().Contains("DbConnection::Open")) {
+                                if (i > 55 && createAll != null) {
+                                    var callCreate = il.Create(OpCodes.Call, createAll);
+                                    il.InsertAfter(instr, callCreate);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         int replaced = 0;
@@ -97,6 +160,7 @@ public class Patcher {
         Console.WriteLine("Total de instrucoes ldstr modificadas com seguranca: " + replaced);
         string tempOut = Path.Combine(gameDir, "WTF_patched_temp.exe");
         asm.Write(tempOut);
+        asm.Dispose();
 
         File.Copy(tempOut, gameExe, true);
         File.Delete(tempOut);
@@ -141,6 +205,14 @@ public class Patcher {
             return 0;
         }
 
+        // Protecao CRITICA para classes de carregamento de arte e assets graficos
+        if (type.Name == "LoaderProc" || type.Name == "MenuBackground" || type.Name == "MenuBackgroundV2" || type.Name == "MONSTERBAG") {
+            return 0;
+        }
+        if (type.BaseType != null && type.BaseType.Name == "ParticleEffect") {
+            return 0;
+        }
+
         // Protecao CRITICA para CHARACTER_DATA: traduzir apenas notificacoes ao jogador, NUNCA instrucoes SQL!
         if (type.Name == "CHARACTER_DATA") {
             foreach (var m in type.Methods) {
@@ -164,6 +236,11 @@ public class Patcher {
 
             // Protecao CRITICA contra shaders, tecnicas e render targets de navegacao grafica
             if (m.Name == "drawBumpyStuff" || m.Name == "combinePasses" || m.Name == "applyToScreen" || m.Name == "drawGraphs") {
+                continue;
+            }
+
+            // Protecao CRITICA para metodos de carregamento de conteudo e efeitos de particula
+            if (m.Name == "LoadContent" || m.Name == "loadContent" || m.Name == "LoadParticleEffect") {
                 continue;
             }
 
@@ -259,6 +336,21 @@ public class Patcher {
                s == "Failed to upgrade an old profile";
     }
 
+    static bool CheckIfOriginal(string exePath) {
+        try {
+            var asm = AssemblyDefinition.ReadAssembly(exePath);
+            foreach (var type in asm.MainModule.Types) {
+                if (type.FullName == "CoOpSpRpG.Rarity") {
+                    foreach (var f in type.Fields) {
+                        if (f.Name == "Common") return true;
+                        if (f.Name == "Comum") return false;
+                    }
+                }
+            }
+        } catch { }
+        return true;
+    }
+
     static bool IsSqlOrTechnical(string s) {
         if (string.IsNullOrEmpty(s)) return true;
         string lower = s.ToLowerInvariant().Trim();
@@ -268,8 +360,8 @@ public class Patcher {
             lower == "type" || lower == "color" || lower == "font" || lower == "text" || lower == "bind")
             return true;
 
-        // Pasta Content do MonoGame e WMI
-        if (lower == "content" || lower == @"root\cimv2") return true;
+        // Pasta Content do MonoGame, WMI e caminhos de assets
+        if (lower == "content" || lower == @"root\cimv2" || lower.StartsWith("content/")) return true;
 
         // Cues de audio do XACT / MonoGame SoundBank
         if (lower == "fire" || lower == "warpspool" || lower == "klaxon_loop" || lower == "amb_reactor-loop") return true;
@@ -287,10 +379,16 @@ public class Patcher {
             lower == "robo barkeep 880" || lower == "robo barkeep 890")
             return true;
 
+        // Logs de rede / thread / exceptions tecnicas
+        if (lower.StartsWith("net thread") || lower.StartsWith("server process") || lower.StartsWith("error running process") || lower.StartsWith("exception when sending"))
+            return true;
+
         // Extensoes de arquivo e caminhos de diretorio
         if (s.StartsWith(".") && s.Length <= 5 && !s.Contains(" "))
             return true;
         if ((s.StartsWith("\\") || s.StartsWith("/")) && (s.EndsWith("\\") || s.EndsWith("/")))
+            return true;
+        if (lower.EndsWith(".xwb") || lower.EndsWith(".xsb") || lower.EndsWith(".xnb") || lower.EndsWith(".png") || lower.EndsWith(".dll"))
             return true;
 
         // SQLite connection strings & databases
@@ -298,7 +396,7 @@ public class Patcher {
             return true;
 
         // SQL DDL & DML
-        if (lower.StartsWith("create table") || lower.StartsWith("delete from") || lower.StartsWith("insert into") || lower.StartsWith("insert or") || lower.StartsWith("drop table") || lower.StartsWith("pragma ") || lower.StartsWith("alter table"))
+        if (lower.StartsWith("create table") || lower.StartsWith("delete from") || lower.StartsWith("insert into") || lower.StartsWith("insert or") || lower.StartsWith("drop table") || lower.StartsWith("pragma ") || lower.StartsWith("alter table") || lower.StartsWith("update "))
             return true;
 
         if (lower.StartsWith("select ") && (lower.Contains(" from ") || lower.Contains(" count(") || lower.Contains(" where ") || lower.EndsWith("from ")))

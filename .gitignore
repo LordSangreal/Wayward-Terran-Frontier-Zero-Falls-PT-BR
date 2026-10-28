@@ -10,6 +10,10 @@ Mono.Cecil*.dll
 # Batches intermediários temporários
 batch_*.json
 strings_to_translate.json
+*.txt
+*_strings.txt
+*_clean.txt
+translatable_candidates.json
 
 # Python caches e temporários
 __pycache__/
@@ -19,9 +23,5 @@ __pycache__/
 # Arquivos de log e testes locais de compilação
 scripts/*.exe
 scripts/*.txt
+scripts/*.json
 scripts/CheckAsm.cs
-scripts/missing_*.json
-scripts/tutorial_*.json
-scripts/filtered_to_translate.json
-scripts/remaining_to_translate.json
-scripts/all_game_strings.json

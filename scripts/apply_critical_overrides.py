@@ -1,0 +1,197 @@
+# -*- coding: utf-8 -*-
+import json
+import os
+import unicodedata
+
+BASE_DIR = r"d:\Tradução WTF Zero falls"
+TRANS_JSON = os.path.join(BASE_DIR, "translations_exe.json")
+PATCHER_JSON = os.path.join(BASE_DIR, r"patcher\translations_exe.json")
+
+def strip_accents(text):
+    if not text:
+        return text
+    nfkd = unicodedata.normalize('NFKD', text)
+    return ''.join([c for c in nfkd if not unicodedata.combining(c)])
+
+# MANUAL OVERRIDES que DEVEM ter prioridade máxima
+CRITICAL_OVERRIDES = {
+    "Craft goo": "Fabricar gosma",
+    "Craft Gun": "Fabricar arma",
+    "Dirt": "Terra",
+    "Lead Ore": "Minerio de Chumbo",
+    "Silicon": "Silicio",
+    "Steel ingots": "Barras de Aco",
+    "Insulation": "Isolamento",
+    "Gears": "Engrenagens",
+    "Valve": "Valvula",
+    "Magnet": "Ima",
+    "Microcontroller": "Microcontrolador",
+    "Bracket": "Suporte",
+    "Pipe": "Tubo",
+    "Bolts": "Parafusos",
+    "Biomass": "Biomassa",
+    "Snacks": "Lanches",
+    "Assorted parts": "Pecas sortidas",
+    "Troilite Ore": "Minerio de Troilita",
+    "Troilite": "Troilita",
+    "Gold Ore": "Minerio de Ouro",
+    "Iron Ore": "Minerio de Ferro",
+    "Titanium Ore": "Minerio de Titanio",
+    "Rhodium Ore": "Minerio de Rodio",
+    "Ithacit Ore": "Minerio de Itacita",
+    "Itthacit Ore": "Minerio de Itacita",
+    "Mitraxit Ore": "Minerio de Mitraxita",
+    "Iron Ingot": "Barra de Ferro",
+    "Gold Wire": "Fio de Ouro",
+    "Titanium Ingot": "Barra de Titanio",
+    "Rhodium Ingot": "Barra de Rodio",
+    "Ithacit Ingot": "Barra de Itacita",
+    "Mitraxit Ingot": "Barra de Mitraxita",
+    "Carbon Nanotubes": "Nanotubos de Carbono",
+    "Graphene sheets": "Folhas de Grafeno",
+    "Steel springs": "Molas de Aco",
+    "Electronic Components": "Componentes Eletronicos",
+    "Core node": "No Central",
+    "Neutralino shard": "Fragmento de Neutralino",
+    "Crystal spore": "Esporo de Cristal",
+    "Crystal Shard": "Fragmento de Cristal",
+    "Exotic matter": "Materia Exotica",
+    "Dense Exotic matter": "Materia Exotica Densa",
+    "Subspace tube": "Tubo Subespacial",
+    "Remote brain transmitter": "Transmissor Cerebral Remoto",
+    "Serenity unit": "Unidade de Serenidade",
+    "Really green fuse": "Fusivel Muito Verde",
+    "Ablative Armor": "Blindagem Ablativa",
+    "Armor Plate": "Placa de Blindagem",
+    "Deflective Plate": "Placa Defletora",
+    "Collision Avoider": "Evitador de Colisoes",
+    "Shield Capacitor": "Capacitor de Escudo",
+    "Shield Coil": "Bobina de Escudo",
+    "Shield Hardener": "Endurecedor de Escudo",
+    "PD Extender": "Extensor de Defesa de Ponto",
+    "Regen Enhancer": "Aprimorador de Regeneracao",
+    "Regen Extender": "Extensor de Regeneracao",
+    "Bullet Range Chip": "Chip de Alcance de Projeteis",
+    "Bullet Damage Chip": "Chip de Dano de Projeteis",
+    "Bullet Velocity Chip": "Chip de Velocidade de Projeteis",
+    "Turret Accuracy Chip": "Chip de Precisao de Torreta",
+    "Turret Fire Rate Chip": "Chip de Cadencia de Torreta",
+    "Turret Traverse Chip": "Chip de Giro de Torreta",
+    "Double Machine Gun": "Metralhadora Dupla",
+    "Fixed Machine Gun": "Metralhadora Fixa",
+    "Handgun": "Pistola",
+    "Large Barrel": "Cano Grande",
+    "Medium Barrel": "Cano Medio",
+    "Small Barrel": "Cano Pequeno",
+    "Tiny Barrel": "Cano Minusculo",
+    "Rifle barrel": "Cano de Fuzil",
+    "Large Hail Cannon": "Canhao de Granizo Grande",
+    "Small Hail Cannon": "Canhao de Granizo Pequeno",
+    "Tiny Hail cannon": "Canhao de Granizo Minusculo",
+    "Medium flak": "Flak Medio",
+    "Small flak": "Flak Pequeno",
+    "Medium rail gun": "Canhao Eletromagnetico Medio",
+    "Small rail gun": "Canhao Eletromagnetico Pequeno",
+    "Small rail array": "Matriz Eletromagnetica Pequena",
+    "Small rail repeater": "Repetidor Eletromagnetico Pequeno",
+    "Tiny rail repeater": "Repetidor Eletromagnetico Minusculo",
+    "Titanium Housing": "Carcaca de Titanio",
+    "Triple Machine Gun": "Metralhadora Tripla",
+    "Tiny Machine Gun": "Metralhadora Minuscula",
+    "Medium bearing": "Rolamento Medio",
+    "Small bearing": "Rolamento Pequeno",
+    "Tiny bearing": "Rolamento Minusculo",
+    "Medium Rail": "Trilho Medio",
+    "Small Rail": "Trilho Pequeno",
+    "You were specifically designed not to sleep": "Voce foi projetado especificamente para nao dormir",
+    "Activate airlock": "Ativar eclusa",
+    "Door is locked open": "Porta travada aberta",
+    "Use navigation console": "Usar console de navegacao",
+    "Use gunnery console": "Usar console de artilharia",
+    "This console is connected to nothing": "Este console nao esta conectado a nada",
+    "Needs repair": "Necessita de reparos",
+    "SELF DESTRUCT:": "AUTODESTRUICAO:",
+    "Nap": "Soneca",
+    "to Undock": "para Desacoplar",
+    "para Acoplar": "para Acoplar",
+    "Press": "Pressione",
+    "Station has no hangar. Use an airlock": "A estacao nao possui hangar. Use uma eclusa",
+    "There was no room in your inventory so your ship was packed and placed into safe storage which you can access from your home base.": "Nao havia espaco em seu inventario, entao sua nave foi guardada no armazenamento seguro acessivel em sua base.",
+    "The store doesn't buy that item type": "A loja nao compra este tipo de item",
+    "Deposit refunded for mission cargo that could not be loaded": "Deposito reembolsado para carga de missao que nao pode ser carregada",
+    "a mission's cargo could not be loaded due to lack of space": "a carga de uma missao nao pode ser carregada por falta de espaco",
+    "Your mission cargo would not fit into ship storage so it remains waiting for you in the hangar when you depart": "A carga da sua missao nao cabia no armazenamento da nave, portanto permanecera esperando por voce no hangar quando voce partir",
+    "You departed in a ship that didn't have sufficient free space for existing cargo": "Voce partiu em uma nave que nao tinha espaco livre suficiente para a carga existente",
+    "You departed in a ship that didn't have a bedroom for every passenger": "Voce partiu em uma nave que nao tinha um quarto para cada passageiro",
+    "There were insufficient beds so some of your passengers remain waiting for you in the hangar when you depart": "Nao havia leitos suficientes, portanto alguns de seus passageiros continuam esperando por voce no hangar quando voce partir",
+    "One of your passengers received a free room upgrade because there weren't enough beds at their ticket price": "Um dos seus passageiros recebeu uma melhoria gratuita de quarto porque nao havia leitos suficientes pelo valor da passagem",
+    "A fire has started on your ship.": "Um incendio comecou na sua nave.",
+    "Warning: A reactor has limited its output to prevent overheating": "Aviso: Um reator limitou sua potencia para evitar superaquecimento",
+    "A missile factory failed to find sufficient grey goo in ship cargo to manufacture missiles": "Uma fabrica de misseis nao encontrou gosma cinza suficiente na carga da nave para fabricar misseis",
+    "You already have that research in your queue": "Voce ja possui esta pesquisa em sua fila",
+    "Preparing Higgs drive": "Preparando motor Higgs",
+    "Console automation": "Automacao de consoles",
+    "Click to toggle AI control of your gunnery consoles. Does nothing if the console is occupied": "Clique para alternar o controle por IA dos consoles de artilharia. Nao faz nada se o console estiver ocupado",
+    "to open Map and pick destination": "para abrir o Mapa e escolher destino",
+    "to target": "para mirar",
+    "Access cargo": "Acessar carga",
+    "Access Matter Furnace": "Acessar Fornalha de Materia",
+    "Access Logistics": "Acessar Logistica",
+    "Access Research": "Acessar Pesquisa",
+    "Trade with shop": "Comerciar com a loja",
+    "Trade with station": "Comerciar com a estacao",
+    "Out of order": "Fora de servico",
+    "Underlay can": "Janela de fundo",
+    "Confirm?": "Confirmar?",
+    "What is this for?": "Para que serve isto?",
+    "Confirm": "Confirmar",
+    "Cancel": "Cancelar",
+    "Transfer": "Transferir",
+    "Buy": "Comprar",
+    "Sell": "Vender",
+    "New inventory:": "Novo inventario:",
+    "Quantity": "Quantidade",
+    "Price $": "Preco $",
+    "Scrap:": "Sucata:",
+    "Credits:": "Creditos:",
+    "Price:": "Preco:",
+    "Save game": "Salvar jogo",
+    "Save + exit": "Salvar e sair",
+    "Spawn ship": "Gerar nave",
+    "Edit design": "Editar projeto",
+    "Clone design": "Clonar projeto",
+    "Unload cargo": "Descarregar carga",
+    "Scrap": "Desmanchar",
+    "Repair": "Reparar",
+    "Restock Ammo": "Reabastecer Municao",
+    "Tractor to dock": "Rebocar para a doca",
+    "Resources deposited": "Recursos depositados",
+    "ship added to inventory": "nave adicionada ao inventario",
+    "No space in inventory": "Sem espaco no inventario",
+    "enter a unique name for your design": "insira um nome exclusivo para seu projeto",
+    "You can only scrap packed ships": "Voce so pode desmanchar naves embaladas",
+    "Scrap and research": "Desmanchar e pesquisar",
+    "Pack ship": "Embalar nave",
+    "Provision": "Abastecer",
+    "Tip: Capture ships and reverse engineer them to unlock new designs": "Dica: Capture naves e faca engenharia reversa para desbloquear novos projetos",
+    "Ship Navigation": "Navegacao da Nave"
+}
+
+def apply_overrides(file_path):
+    with open(file_path, 'r', encoding='utf-8-sig') as f:
+        d = json.load(f)
+    
+    modified = 0
+    for k, v in CRITICAL_OVERRIDES.items():
+        clean_v = strip_accents(v)
+        if k not in d or d[k] != clean_v:
+            d[k] = clean_v
+            modified += 1
+            
+    print(f"{file_path}: {modified} termos sobrescritos com prioridade maxima.")
+    with open(file_path, 'w', encoding='utf-8-sig') as f:
+        json.dump(d, f, indent=2, ensure_ascii=False)
+
+apply_overrides(TRANS_JSON)
+apply_overrides(PATCHER_JSON)
+print("Sobrescritas criticas aplicadas com sucesso!")

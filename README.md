@@ -1,16 +1,43 @@
-# Tradução PT-BR - Wayward Terran Frontier: Zero Falls
+# Tradução PT-BR v1.0.1 - Wayward Terran Frontier: Zero Falls
 
-Tradução completa para **Português do Brasil (PT-BR)** do jogo **Wayward Terran Frontier: Zero Falls** (Steam AppID: `392080`).
+Tradução completa e atualizada para **Português do Brasil (PT-BR)** do jogo **Wayward Terran Frontier: Zero Falls** (Steam AppID: `392080`).
 
 ---
 
 ## 🚀 Como Instalar (Instalação Fácil em 1 Clique)
 
-1. Baixe o repositório clicando em **Code** -> **Download ZIP** no GitHub (ou baixe na aba [Releases](https://github.com/LordSangreal/Wayward-Terran-Frontier-Zero-Falls-PT-BR/releases)).
+1. Baixe o pacote **`Zero_Falls_PTBR_v1.0.1.zip`** na aba [Releases](https://github.com/LordSangreal/Wayward-Terran-Frontier-Zero-Falls-PT-BR/releases) (ou baixe o repositório em **Code** -> **Download ZIP**).
 2. Extraia o arquivo ZIP em qualquer pasta do seu computador.
 3. Dê um duplo clique no arquivo **`Instalar_Traducao.bat`**.
 4. O instalador detectará automaticamente a pasta do jogo na sua Steam (ou solicitará o caminho caso esteja em outra partição personalizada).
 5. Pronto! Inicie o jogo normalmente pela sua biblioteca da **Steam**.
+
+---
+
+## 📝 Notas de Atualização - Versão 1.0.1
+
+### 🛠️ Correções e Compatibilidade de Versão
+- **Suporte à Nova Versão de Testes Steam (`unstable` beta):** Compatibilidade total com a atualização recente do jogo.
+- **Correção de Crash ao Carregar Saves Antigos:** Corrigido o erro crítico de SQLite `no such table: professions` injetando auto-migração nativa via Mono.Cecil diretamente no método `CHARACTER_DATA::loadWorldCharacter` do executável e atualizando os saves existentes.
+- **Desbloqueio de Campanha / Singleplayer:** Corrigido o travamento do menu principal que forçava apenas o modo multijogador na branch de teste (`CONFIG::openMP` revertido para `false`).
+- **Detecção Inteligente de Atualizações Steam:** O instalador detecta atualizações automáticas da Steam, arquiva a versão anterior em `WTF_backup_anterior.exe` e cria um backup limpo do novo executável oficial.
+
+### 🌐 Localização Aprofundada e Novos Termos
+- **Tradução Completa de Itens e Textos de Sabor:**
+  - 100% dos nomes e descrições de minérios, materiais, sucatas, componentes artesanais, sementes de cristal e chips de módulos (`ITEMBAG`, `LOOTBAG`, `TILEBAG`).
+  - Textos de sabor traduzidos e adaptados (descrições bem-humoradas da Terra, Comida Humana, Matéria Exótica, Confinamento molecular de caixas, etc.).
+- **Mensagens Contextuais e Avisos no Canto Inferior Esquerdo (HUD/Chat):**
+  - Interação com dormitório/cama: *"Voce foi projetado especificamente para nao dormir"*.
+  - Portas e Eclusas: *"Ativar eclusa"*, *"Porta travada aberta"*.
+  - Consoles da ponte: *"Usar console de navegacao"*, *"Usar console de artilharia"*, *"Este console nao esta conectado a nada"*, *"Necessita de reparos"*.
+  - Ações de criação: *"Fabricar gosma"* (corrigido do antigo "gosma artesanal") e *"Fabricar arma"*.
+  - Manifesto de voo e passageiros (`SPManifest`): avisos de decolagem sem espaço no inventário, passageiros aguardando no hangar por falta de leitos, reembolso de caução de missões e upgrades gratuitos de cabine.
+  - Voo e Combate (`VNavigationRev3`): *"para Desacoplar"*, automação de consoles de tiro, piloto automático e carregamento do motor Higgs.
+  - Comércio e Armazém: mensagem de recusa *"A loja nao compra este tipo de item"* e botões de transferência.
+- **Banco de Parâmetros (`world_params.sqlite`):**
+  - Tradução direta de todas as 98 receitas de criação na tabela `crafts` e 11 missões na tabela `quests`.
+  - O instalador agora faz backup e copia automaticamente o banco de parâmetros traduzido para a pasta do jogo.
+- **Dicionário Expandido:** Mais de **8.270 termos consolidados** e mais de **13.000 instruções IL traduzidas** com 0 caracteres com diacríticos (estritamente ASCII 32–126), prevenindo falhas na renderização de fontes do MonoGame.
 
 ---
 

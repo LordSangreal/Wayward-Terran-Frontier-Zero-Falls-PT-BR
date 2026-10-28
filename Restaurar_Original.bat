@@ -33,6 +33,12 @@ if exist "%GAME_DIR%\WTF_backup.exe" (
     echo 2. Vá em Propriedades -> Arquivos Instalados -> Verificar integridade dos arquivos.
 )
 
+if exist "%GAME_DIR%\parameterdb\world_params_backup.sqlite" (
+    echo Restaurando banco de parametros original...
+    copy /Y "%GAME_DIR%\parameterdb\world_params_backup.sqlite" "%GAME_DIR%\parameterdb\world_params.sqlite" >nul
+    echo Banco de parametros restaurado com sucesso!
+)
+
 echo.
 echo Operação concluída.
 pause
